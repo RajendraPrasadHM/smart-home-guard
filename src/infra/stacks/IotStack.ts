@@ -12,6 +12,7 @@ interface IotStackProps extends StackProps {
     smartHomeMotionDetectionLambda: LambdaFunction.Function;
     smartHomeTable: ITable;
     smartHomeDeviceTable: ITable
+    lightDetectionLambda: LambdaFunction.Function;
 }
 
 
@@ -20,6 +21,9 @@ export class IotStack extends Stack {
 
     constructor(scope: Construct, id: string, props?: IotStackProps) {
         super(scope, id, props)
+
+
+
         // Create a smartHomeUserThingGroup in iot thing group
         const smartHomeUserThingGroup = new iot.CfnThingGroup(this, 'smartHomeUserThingGroup', {
             thingGroupName: 'smartHomeUserThingGroup',
@@ -53,14 +57,27 @@ export class IotStack extends Stack {
                 actions: [
                     {
                         lambda: {
-                            functionArn: props?.smartHomeMotionDetectionLambda.functionArn
-                        }
+                            functionArn: props.lightDetectionLambda.functionArn,
+                            payload: {
+                                topic: "topic()",
+                                payload: "base64($input)"
+                            }
+                        } as any
                     }
                 ],
                 ruleDisabled: false,
                 sql: "SELECT * FROM 'home/user/light/control'"
             }
         });
+
+        // Allow IoT to invoke the Lambda function
+        const lambdaRole = props.lightDetectionLambda.role as iam.Role;
+        lambdaRole.addToPolicy(new iam.PolicyStatement({
+            actions: ['lambda:InvokeFunction', 'lambda:*'],
+            resources: ["*"],
+            effect: iam.Effect.ALLOW,
+            sid: 'AllowIoTToInvokeLambda'
+        }));
 
         this.smartHomeThingGroup = smartHomeUserThingGroup;
     }

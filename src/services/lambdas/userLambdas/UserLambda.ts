@@ -181,10 +181,10 @@ export class UserLambda {
             })
 
             // Check if the item exists
-            if (!existingItem.Item) {
+            if (!existingItem) {
                 return {
                     statusCode: 404,
-                    body: JSON.stringify({ message: 'Item not found' })
+                    body: JSON.stringify({ message: 'Item not found', attributesToUpdate })
                 };
             }
 

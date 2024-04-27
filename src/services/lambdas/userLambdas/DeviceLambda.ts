@@ -1,9 +1,9 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult, Context } from "aws-lambda";
-import { type CognitoIdentityServiceProvider, type DynamoDB } from 'aws-sdk';
+import { type DynamoDB } from 'aws-sdk';
 import { v4 } from "uuid";
 import { getUserId } from "../../utils/utils";
 import { createData, deleteData, getAllData, getData, updateData } from "../../utils/queries";
-import { AddThingToThingGroupCommand, CreateThingCommand, IoTClient, UpdateThingGroupCommand } from "@aws-sdk/client-iot";
+import { AddThingToThingGroupCommand, CreateThingCommand, IoTClient, ListThingsInThingGroupCommand, UpdateThingGroupCommand } from "@aws-sdk/client-iot";
 
 const iotClient = new IoTClient()
 export class DeviceLambda {
@@ -15,37 +15,17 @@ export class DeviceLambda {
             const deviceId = v4();
             const userId = getUserId(event);
 
-            await iotClient.send(new CreateThingCommand({
-                thingName: lightId,
-                attributePayload: {
-                    attributes: {
-                        'isLightOn': 'false',
-                        'isMotionDetected': 'false',
-                        'deviceStatus': 'ACTIVE'
-                    }
+            const isCheckLightThing = await this.checkAndCreateThing(lightId);
+            const isCheckMotionThing = await this.checkAndCreateThing(motionSensorId);
+
+            if (isCheckLightThing || isCheckMotionThing) {
+                return {
+                    statusCode: 409,
+                    body: JSON.stringify({
+                        message: `Already register please check once!.`
+                    })
                 }
-            }));
-            await iotClient.send(new CreateThingCommand({
-                thingName: motionSensorId,
-                attributePayload: {
-                    attributes: {
-                        'isMotionDetected': 'false',
-                        'deviceStatus': 'ACTIVE',
-                        'isLightOn': 'false'
-                    }
-                }
-            }))
-
-            await iotClient.send(new AddThingToThingGroupCommand({
-                thingGroupName: process.env.IOT_THING_GROUP_NAME,
-                thingName: motionSensorId
-            }));
-
-            await iotClient.send(new AddThingToThingGroupCommand({
-                thingGroupName: process.env.IOT_THING_GROUP_NAME,
-                thingName: lightId
-            }))
-
+            }
             await createData(ddbClient, {
                 TableName: process.env.DEVICE_TABLE_NAME,
                 Item: {
@@ -255,5 +235,42 @@ export class DeviceLambda {
                 body: JSON.stringify(error)
             }
         }
+    }
+    checkAndCreateThing = async (thingName) => {
+
+        try {
+            const thingsResponse = await iotClient.send(new ListThingsInThingGroupCommand({
+                thingGroupName: process.env.IOT_THING_GROUP_NAME
+            }));
+
+
+            const lightThing = thingsResponse.things.some(thing => thing === thingName);
+            console.log("the Thing Response is:", thingsResponse);
+            if (lightThing) {
+                return true
+            }
+            await iotClient.send(new CreateThingCommand({
+                thingName: thingName,
+                attributePayload: {
+                    attributes: {
+                        'isLightOn': 'false',
+                        'isMotionDetected': 'false',
+                        'deviceStatus': 'ACTIVE'
+                    }
+                }
+            }));
+
+            await iotClient.send(new AddThingToThingGroupCommand({
+                thingGroupName: process.env.IOT_THING_GROUP_NAME,
+                thingName: thingName
+            }));
+
+            return false
+
+        } catch (error) {
+            console.error("Error creating thing and adding to group:", error);
+            throw new Error(error);
+        }
+
     }
 }

@@ -25,7 +25,7 @@ export class DataStack extends Stack {
         this.smartHomeTable = userTable;
 
         // Device Table
-        this.smartHomeDeviceTable = new Table(this, 'SmartHomeDeviceTable', {
+        const deviceTable = new Table(this, 'SmartHomeDeviceTable', {
             partitionKey: {
                 name: 'deviceId',
                 type: AttributeType.STRING
@@ -37,5 +37,23 @@ export class DataStack extends Stack {
             tableName: 'SmartHomeDeviceTable',
             removalPolicy: RemovalPolicy.DESTROY
         });
+        deviceTable.addGlobalSecondaryIndex({
+            indexName: "lightId",
+            partitionKey: {
+                name: 'lightId',
+                type: AttributeType.STRING
+            }
+        });
+        // deviceTable.addGlobalSecondaryIndex({
+        //     indexName: "motionSensorId",
+        //     partitionKey: {
+        //         name: 'motionSensorId',
+        //         type: AttributeType.STRING
+        //     }
+        // });
+
+        this.smartHomeDeviceTable = deviceTable
+
+
     }
 }

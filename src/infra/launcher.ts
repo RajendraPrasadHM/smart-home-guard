@@ -24,7 +24,8 @@ const lambdaStack = new LambdaStack(app, "LambdaStack", {
 new IotStack(app, "IotStack", {
     smartHomeMotionDetectionLambda: lambdaStack.motionDetectionLambdaArn,
     smartHomeTable: datatStack.smartHomeTable,
-    smartHomeDeviceTable: datatStack.smartHomeDeviceTable
+    smartHomeDeviceTable: datatStack.smartHomeDeviceTable,
+    lightDetectionLambda: lambdaStack.lightDetectionLambda,
 });
 
 // API Changes
