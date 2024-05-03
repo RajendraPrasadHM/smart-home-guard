@@ -8,6 +8,7 @@ export class DataStack extends Stack {
 
     public readonly smartHomeTable: ITable
     public readonly smartHomeDeviceTable: ITable;
+    public readonly smartHomeNotificationTable: ITable;
 
     constructor(scope: Construct, id: string, props?: StackProps) {
         super(scope, id, props)
@@ -44,16 +45,23 @@ export class DataStack extends Stack {
                 type: AttributeType.STRING
             }
         });
-        // deviceTable.addGlobalSecondaryIndex({
-        //     indexName: "motionSensorId",
-        //     partitionKey: {
-        //         name: 'motionSensorId',
-        //         type: AttributeType.STRING
-        //     }
-        // });
-
         this.smartHomeDeviceTable = deviceTable
 
+        // Device Table
+        const notificationTable = new Table(this, 'SmartHomeNotificationTable', {
+            partitionKey: {
+                name: 'userId',
+                type: AttributeType.STRING
+            },
+            sortKey: {
+                name: 'deviceId',
+                type: AttributeType.STRING
+            },
+            tableName: 'SmartHomeNotificationTable',
+            removalPolicy: RemovalPolicy.DESTROY
+        });
+
+        this.smartHomeNotificationTable = notificationTable;
 
     }
 }

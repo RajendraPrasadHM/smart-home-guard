@@ -59,6 +59,7 @@ export class ApiStack extends Stack {
             .addResource(APICONSTANTS.ID)
             .addMethod(APICONSTANTS.METHOD.DELETE, props.smartHomeLambdaIntegration, optionsWithAuth);
 
+        /* Device API's Creation START */
         const deviceApi = smartHomeResource
             .addResource(APICONSTANTS.DEVICES);
 
@@ -72,5 +73,15 @@ export class ApiStack extends Stack {
         deviceApiWithId.addMethod(APICONSTANTS.METHOD.GET, props.smartHomeLambdaIntegration, optionsWithAuth);
         deviceApiWithId.addMethod(APICONSTANTS.METHOD.PATCH, props.smartHomeLambdaIntegration, optionsWithAuth);
         deviceApiWithId.addMethod(APICONSTANTS.METHOD.DELETE, props.smartHomeLambdaIntegration, optionsWithAuth);
+        /* Device API's Creation END */
+
+        /* Notification API's Creation START */
+        const notifyApi = smartHomeResource
+            .addResource(APICONSTANTS.NOTIFY);
+        notifyApi.addMethod(APICONSTANTS.METHOD.GET, props.smartHomeLambdaIntegration, optionsWithAuth);
+        const notifyApiWithId = notifyApi.addResource(APICONSTANTS.ID)
+        notifyApiWithId.addMethod(APICONSTANTS.METHOD.GET, props.smartHomeLambdaIntegration, optionsWithAuth);
+        notifyApiWithId.addMethod(APICONSTANTS.METHOD.DELETE, props.smartHomeLambdaIntegration, optionsWithAuth);
+        /* Notification API's Creation END */
     }
 }

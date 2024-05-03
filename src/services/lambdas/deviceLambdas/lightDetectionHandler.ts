@@ -1,9 +1,10 @@
 // index.js (or index.ts if using TypeScript)
 import * as AWS from 'aws-sdk';
 import * as dotenv from 'dotenv';
-import { getData, updateData } from '../../utils/queries';
+import { createData, getData, updateData } from '../../utils/queries';
 import { sendEmail } from '../../utils/email';
 import { IoTClient, ListThingsInThingGroupCommand, UpdateThingCommand } from "@aws-sdk/client-iot";
+import { v4 } from 'uuid';
 
 const iotClient = new IoTClient()
 dotenv.config();
@@ -89,7 +90,21 @@ Room-Location: "${getDeviceDetails.roomName}".`,
             }
         };
         await sendEmail(getUserDetails.email, params.Subject, params.Message);
-        await sns.publish(params).promise();
+        const snsPublish = await sns.publish(params).promise();
+        console.log("the publish Data:", snsPublish);
+
+        const result = await createData(ddbClient, {
+            TableName: process.env.NOTIFICATION_TABLE_NAME,
+            Item: {
+                alertId: { S: v4() },
+                userId: { S: getUserDetails.id },
+                deviceId: { S: getDeviceDetails.deviceId },
+                Date: { S: new Date().toISOString() },
+                message: { S: JSON.stringify(params) },
+                publishedData: { S: JSON.stringify(snsPublish) }
+            }
+        });
+        console.log(result, "the result it is running");
         return 'Notification sent successfully'
     } catch (error) {
         console.error("Error :", error);

@@ -17,5 +17,6 @@ export const Api_Constants = Object.freeze({
     'USER': 'user',
     'CONFIG': 'config',
     'ID': '{id}',
+    'NOTIFY': 'notify',
     METHOD
 });

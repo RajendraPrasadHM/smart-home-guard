@@ -10,21 +10,22 @@ import { IotStack } from "./stacks/IotStack";
 
 const app = new App();
 // Data Base changes
-const datatStack = new DataStack(app, "DataStack", {});
+const dataStack = new DataStack(app, "DataStack", {});
 // Cognito Changes
 const authStack = new AuthStack(app, "AuthStack", {});
 // Lambda Changes
 const lambdaStack = new LambdaStack(app, "LambdaStack", {
-    smartHomeTable: datatStack.smartHomeTable,
-    smartHomeDeviceTable: datatStack.smartHomeDeviceTable,
+    smartHomeTable: dataStack.smartHomeTable,
+    smartHomeDeviceTable: dataStack.smartHomeDeviceTable,
+    smartHomeNotificationTable: dataStack.smartHomeNotificationTable,
     smartHomeUserPool: authStack.userPool,
     smartHomeUserClientPool: authStack.userPoolClient
 });
 // Iot Changes
 new IotStack(app, "IotStack", {
     smartHomeMotionDetectionLambda: lambdaStack.motionDetectionLambdaArn,
-    smartHomeTable: datatStack.smartHomeTable,
-    smartHomeDeviceTable: datatStack.smartHomeDeviceTable,
+    smartHomeTable: dataStack.smartHomeTable,
+    smartHomeDeviceTable: dataStack.smartHomeDeviceTable,
     lightDetectionLambda: lambdaStack.lightDetectionLambda,
 });
 

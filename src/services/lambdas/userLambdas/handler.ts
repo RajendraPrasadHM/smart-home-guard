@@ -4,12 +4,14 @@ import { CognitoIdentityServiceProvider, DynamoDB } from 'aws-sdk';
 import { Api_Constants as API_CONSTANTS } from "../../../constants/apiConstants";
 import { UserLambda } from "./UserLambda";
 import { DeviceLambda } from "./DeviceLambda";
+import { NotificationsLambda } from "./NotiFicationsLambda";
 
 
 
 
 const userLambda = new UserLambda();
 const deviceLambda = new DeviceLambda();
+const notificationLambda = new NotificationsLambda();
 
 interface Route {
     path: string,
@@ -28,6 +30,9 @@ const routes: Route[] = [
     { path: `/${API_CONSTANTS.SMARTHOMEAPI}/${API_CONSTANTS.DEVICES}/${API_CONSTANTS.ID}`, method: API_CONSTANTS.METHOD.GET, handler: deviceLambda.getDevice },
     { path: `/${API_CONSTANTS.SMARTHOMEAPI}/${API_CONSTANTS.DEVICES}/${API_CONSTANTS.ID}`, method: API_CONSTANTS.METHOD.PATCH, handler: deviceLambda.updateDevice },
     { path: `/${API_CONSTANTS.SMARTHOMEAPI}/${API_CONSTANTS.DEVICES}/${API_CONSTANTS.ID}`, method: API_CONSTANTS.METHOD.DELETE, handler: deviceLambda.deleteDevice },
+    { path: `/${API_CONSTANTS.SMARTHOMEAPI}/${API_CONSTANTS.NOTIFY}/${API_CONSTANTS.ID}`, method: API_CONSTANTS.METHOD.GET, handler: notificationLambda.getNotification },
+    { path: `/${API_CONSTANTS.SMARTHOMEAPI}/${API_CONSTANTS.NOTIFY}`, method: API_CONSTANTS.METHOD.GET, handler: notificationLambda.getAllNotification },
+    { path: `/${API_CONSTANTS.SMARTHOMEAPI}/${API_CONSTANTS.NOTIFY}/${API_CONSTANTS.ID}`, method: API_CONSTANTS.METHOD.DELETE, handler: notificationLambda.deleteNotification },
 
 ];
 async function handler(event: APIGatewayProxyEvent, context: Context): Promise<APIGatewayProxyResult> {

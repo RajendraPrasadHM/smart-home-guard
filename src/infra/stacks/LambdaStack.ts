@@ -14,6 +14,7 @@ import * as snsSubscriptions from '@aws-cdk/aws-sns-subscriptions';
 interface lambdaStackProps extends StackProps {
     smartHomeTable: ITable;
     smartHomeDeviceTable: ITable;
+    smartHomeNotificationTable: ITable;
     smartHomeUserPool: UserPool;
     smartHomeUserClientPool: UserPoolClient;
 }
@@ -39,6 +40,7 @@ export class LambdaStack extends Stack {
         const environments = {
             TABLE_NAME: props.smartHomeTable.tableName,
             DEVICE_TABLE_NAME: props.smartHomeDeviceTable.tableName,
+            NOTIFICATION_TABLE_NAME: props.smartHomeNotificationTable.tableName,
             USER_POOL_ID: props.smartHomeUserPool.userPoolId,
             CLIENT_ID: props.smartHomeUserClientPool.userPoolClientId,
             IOT_THING_GROUP_NAME: "smartHomeUserThingGroup",
